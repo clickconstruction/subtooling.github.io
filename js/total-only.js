@@ -1,6 +1,126 @@
 // Make fixtureCount globally accessible
 let fixtureCount = 1;
 
+// Save form data to local storage
+function saveFormData() {
+    try {
+        const formData = {
+            homeName: document.getElementById('homeName').value,
+            jobDate: document.getElementById('jobDate').value,
+            notes: document.getElementById('notes').value,
+            jobTotal: document.getElementById('jobTotal').value,
+            fixtures: []
+        };
+        
+        // Save fixture data
+        for (let i = 1; i <= fixtureCount; i++) {
+            const fixtureType = document.getElementById(`fixtureType${i}`);
+            const fixtureQuantity = document.getElementById(`fixtureQuantity${i}`);
+            
+            if (fixtureType && fixtureQuantity) {
+                formData.fixtures.push({
+                    type: fixtureType.value,
+                    quantity: fixtureQuantity.value
+                });
+            }
+        }
+        
+        localStorage.setItem('totalOnlyCalculatorData', JSON.stringify(formData));
+        console.log('Form data saved to local storage');
+    } catch (error) {
+        console.error('Error saving form data to local storage:', error);
+    }
+}
+
+// Load form data from local storage
+function loadFormData() {
+    try {
+        const savedData = localStorage.getItem('totalOnlyCalculatorData');
+        if (!savedData) {
+            console.log('No saved data found in local storage');
+            return false;
+        }
+        
+        const formData = JSON.parse(savedData);
+        console.log('Loading saved data from local storage:', formData);
+        
+        // Set form values
+        document.getElementById('homeName').value = formData.homeName || '';
+        
+        if (formData.jobDate) {
+            document.getElementById('jobDate').value = formData.jobDate;
+        } else {
+            // Set current date if no saved date
+            document.getElementById('jobDate').valueAsDate = new Date();
+        }
+        
+        document.getElementById('notes').value = formData.notes || '';
+        document.getElementById('jobTotal').value = formData.jobTotal || '';
+        
+        // Load fixtures
+        if (formData.fixtures && formData.fixtures.length > 0) {
+            // Set first fixture
+            if (formData.fixtures[0]) {
+                document.getElementById('fixtureType1').value = formData.fixtures[0].type || '';
+                document.getElementById('fixtureQuantity1').value = formData.fixtures[0].quantity || '1';
+            }
+            
+            // Add additional fixtures
+            for (let i = 1; i < formData.fixtures.length; i++) {
+                addNewFixtureItem();
+                document.getElementById(`fixtureType${i+1}`).value = formData.fixtures[i].type || '';
+                document.getElementById(`fixtureQuantity${i+1}`).value = formData.fixtures[i].quantity || '1';
+            }
+        }
+        
+        return true;
+    } catch (error) {
+        console.error('Error loading form data from local storage:', error);
+        return false;
+    }
+}
+
+// Clear all form data
+function clearAllData() {
+    try {
+        // Clear local storage
+        localStorage.removeItem('totalOnlyCalculatorData');
+        
+        // Reset form
+        document.getElementById('totalOnlyForm').reset();
+        
+        // Set current date
+        document.getElementById('jobDate').valueAsDate = new Date();
+        
+        // Remove additional fixtures
+        const fixtureItems = document.getElementById('fixtureItems');
+        while (fixtureCount > 1) {
+            const lastItem = document.getElementById('fixtureItem' + fixtureCount);
+            if (lastItem) {
+                fixtureItems.removeChild(lastItem);
+                fixtureCount--;
+            }
+        }
+        
+        // Reset first fixture
+        document.getElementById('fixtureType1').value = '';
+        document.getElementById('fixtureQuantity1').value = '1';
+        document.getElementById('jobTotal').value = '';
+        
+        console.log('All form data cleared');
+    } catch (error) {
+        console.error('Error clearing form data:', error);
+    }
+}
+
+// Add event listeners to form inputs to save data on change
+function addSaveDataListeners() {
+    const formInputs = document.querySelectorAll('#totalOnlyForm input, #totalOnlyForm select, #totalOnlyForm textarea');
+    formInputs.forEach(input => {
+        input.addEventListener('change', saveFormData);
+    });
+}
+
 // Add a new fixture item (simplified version without rates and amounts)
 function addNewFixtureItem(e) {
     if (e) e.preventDefault();
@@ -96,6 +216,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const fixtureItems = document.getElementById('fixtureItems');
     const addFixtureBtn = document.getElementById('addFixture');
     const removeFixtureBtn = document.getElementById('removeFixture');
+    const clearAllDataBtn = document.getElementById('clearAllData');
     const fillSampleDataBtn = document.getElementById('fillSampleData');
     const previewJobValueBtn = document.getElementById('previewJobValue');
     const editJobValueBtn = document.getElementById('editJobValue');
@@ -111,27 +232,59 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log('DOM loaded, buttons found:', {
         addFixtureBtn: !!addFixtureBtn,
         removeFixtureBtn: !!removeFixtureBtn,
+        clearAllDataBtn: !!clearAllDataBtn,
         fixtureItems: !!fixtureItems
     });
     
-    // Set current date for job date
-    const today = new Date();
-    document.getElementById('jobDate').valueAsDate = today;
+    // Load saved data from local storage or set defaults
+    if (!loadFormData()) {
+        // Set current date for job date if no saved data
+        const today = new Date();
+        document.getElementById('jobDate').valueAsDate = today;
+    }
+    
+    // Add save data listeners to form inputs
+    addSaveDataListeners();
     
     // Add event listeners to buttons
     if (addFixtureBtn) {
-        addFixtureBtn.addEventListener('click', addNewFixtureItem);
+        addFixtureBtn.addEventListener('click', function(e) {
+            addNewFixtureItem(e);
+            // Add save data listeners to new fixture inputs
+            addSaveDataListeners();
+            // Save form data after adding fixture
+            saveFormData();
+        });
         console.log('Add fixture button event listener added');
     }
     
     if (removeFixtureBtn) {
-        removeFixtureBtn.addEventListener('click', removeLastFixtureItem);
+        removeFixtureBtn.addEventListener('click', function(e) {
+            removeLastFixtureItem(e);
+            // Save form data after removing fixture
+            saveFormData();
+        });
         console.log('Remove fixture button event listener added');
+    }
+    
+    if (clearAllDataBtn) {
+        clearAllDataBtn.addEventListener('click', function() {
+            if (confirm('Are you sure you want to clear all data? This cannot be undone.')) {
+                clearAllData();
+            }
+        });
+        console.log('Clear all data button event listener added');
     }
     
     // Fill sample data
     if (fillSampleDataBtn) {
         fillSampleDataBtn.addEventListener('click', function() {
+            // Ask for confirmation if there's existing data
+            if (document.getElementById('homeName').value || document.getElementById('fixtureType1').value) {
+                if (!confirm('This will replace any existing data. Continue?')) {
+                    return;
+                }
+            }
             document.getElementById('homeName').value = 'Smith Residence';
             document.getElementById('jobDate').valueAsDate = today;
             
@@ -151,6 +304,9 @@ document.addEventListener('DOMContentLoaded', function() {
             
             document.getElementById('notes').value = 'New construction, all fixtures installed and tested.';
             document.getElementById('jobTotal').value = '675.00';
+            
+            // Save sample data to local storage
+            saveFormData();
         });
     }
     

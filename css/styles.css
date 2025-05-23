@@ -280,6 +280,22 @@ h3 {
     margin-bottom: 0;
 }
 
+.header-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+.btn.danger {
+    background-color: var(--danger-color);
+    color: white;
+    border-color: var(--danger-color);
+}
+
+.btn.danger:hover {
+    background-color: #c82333;
+    border-color: #bd2130;
+}
+
 /* Footer styles */
 footer {
     background-color: var(--footer-bg);
