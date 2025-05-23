@@ -1,0 +1,79 @@
+/* Dark mode styles */
+body.dark-mode {
+    --primary-color: #6d8fc8;
+    --primary-dark: #5a7cb5;
+    --secondary-color: #2c2c2c;
+    --text-color: #e0e0e0;
+    --light-text: #b0b0b0;
+    --border-color: #444;
+    --card-bg: #2a2a2a;
+    --body-bg: #1a1a1a;
+    --header-bg: #222;
+    --footer-bg: #222;
+    --shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+}
+
+body.dark-mode input[readonly],
+body.dark-mode select[disabled] {
+    background-color: #333;
+    color: var(--light-text);
+}
+
+body.dark-mode .btn {
+    background-color: #333;
+    color: var(--text-color);
+    border-color: #444;
+}
+
+body.dark-mode .btn:hover {
+    background-color: #444;
+}
+
+body.dark-mode .btn.primary {
+    background-color: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+}
+
+body.dark-mode .btn.primary:hover {
+    background-color: var(--primary-dark);
+    border-color: var(--primary-dark);
+}
+
+body.dark-mode .btn.secondary {
+    background-color: transparent;
+    color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+body.dark-mode .btn.secondary:hover {
+    background-color: rgba(109, 143, 200, 0.2);
+}
+
+body.dark-mode .preview-content {
+    background-color: #333;
+    border-color: #444;
+}
+
+body.dark-mode input,
+body.dark-mode select,
+body.dark-mode textarea {
+    background-color: #333;
+    color: var(--text-color);
+    border-color: #444;
+}
+
+body.dark-mode input:focus,
+body.dark-mode select:focus,
+body.dark-mode textarea:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(109, 143, 200, 0.3);
+}
+
+body.dark-mode a {
+    color: var(--primary-color);
+}
+
+body.dark-mode a:hover {
+    color: var(--primary-dark);
+}
