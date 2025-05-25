@@ -31,6 +31,7 @@ window.updateFixtureRate = function(index) {
         console.log('Updating rate for fixture ' + index);
         const typeElement = document.getElementById('fixtureType' + index);
         const rateElement = document.getElementById('fixtureRate' + index);
+        const customTypeElement = document.getElementById('customFixtureType' + index);
         
         if (!typeElement || !rateElement) {
             console.error('Missing elements for fixture ' + index);
@@ -40,28 +41,49 @@ window.updateFixtureRate = function(index) {
         const fixtureType = typeElement.value;
         let rate = 0;
         
-        // Set default rates based on fixture type
-        switch (fixtureType) {
-            case 'Light Fixture':
-                rate = 35.00;
-                break;
-            case 'Outlet':
-                rate = 25.00;
-                break;
-            case 'Switch':
-                rate = 20.00;
-                break;
-            case 'Ceiling Fan':
-                rate = 75.00;
-                break;
-            case 'Smoke Detector':
-                rate = 45.00;
-                break;
-            case 'Other':
-                rate = 30.00;
-                break;
-            default:
-                rate = 0;
+        // Toggle custom fixture type input
+        if (fixtureType === 'custom') {
+            if (customTypeElement) {
+                customTypeElement.style.display = 'block';
+            }
+            rate = 50.00; // Default rate for custom fixtures
+        } else {
+            if (customTypeElement) {
+                customTypeElement.style.display = 'none';
+            }
+            
+            // Set default rates based on fixture type
+            switch (fixtureType) {
+                case 'Faucets':
+                    rate = 65.00;
+                    break;
+                case 'Sinks':
+                    rate = 85.00;
+                    break;
+                case 'Toilets':
+                    rate = 120.00;
+                    break;
+                case 'Bathtubs':
+                    rate = 250.00;
+                    break;
+                case 'Showers':
+                    rate = 180.00;
+                    break;
+                case 'Water Heaters':
+                    rate = 350.00;
+                    break;
+                case 'Hose Bibs':
+                    rate = 45.00;
+                    break;
+                case 'Washing Machine Hookups':
+                    rate = 95.00;
+                    break;
+                case 'Dishwasher and Ice Maker Connections':
+                    rate = 85.00;
+                    break;
+                default:
+                    rate = 0;
+            }
         }
         
         rateElement.value = rate.toFixed(2);
@@ -70,6 +92,24 @@ window.updateFixtureRate = function(index) {
         calculateFixtureAmount(index);
     } catch (error) {
         console.error('Error updating rate for fixture ' + index + ':', error);
+    }
+};
+
+// Define updateCustomFixtureType as a global function
+window.updateCustomFixtureType = function(index) {
+    try {
+        console.log('Updating custom fixture type for fixture ' + index);
+        const customTypeElement = document.getElementById('customFixtureType' + index);
+        
+        if (!customTypeElement) {
+            console.error('Missing custom type element for fixture ' + index);
+            return;
+        }
+        
+        // Save form data after updating custom type
+        saveFormData();
+    } catch (error) {
+        console.error('Error updating custom fixture type for fixture ' + index + ':', error);
     }
 };
 
@@ -128,13 +168,18 @@ function addNewFixtureItem(e) {
                     <label for="fixtureType${fixtureCount}">Fixture Type:</label>
                     <select id="fixtureType${fixtureCount}" name="fixtureType${fixtureCount}" required onchange="updateFixtureRate(${fixtureCount})">
                         <option value="">Select Type</option>
-                        <option value="Light Fixture">Light Fixture</option>
-                        <option value="Outlet">Outlet</option>
-                        <option value="Switch">Switch</option>
-                        <option value="Ceiling Fan">Ceiling Fan</option>
-                        <option value="Smoke Detector">Smoke Detector</option>
-                        <option value="Other">Other</option>
+                        <option value="Faucets">Faucets</option>
+                        <option value="Sinks">Sinks</option>
+                        <option value="Toilets">Toilets</option>
+                        <option value="Bathtubs">Bathtubs</option>
+                        <option value="Showers">Showers</option>
+                        <option value="Water Heaters">Water Heaters</option>
+                        <option value="Hose Bibs">Hose Bibs</option>
+                        <option value="Washing Machine Hookups">Washing Machine Hookups</option>
+                        <option value="Dishwasher and Ice Maker Connections">Dishwasher and Ice Maker Connections</option>
+                        <option value="custom">Custom...</option>
                     </select>
+                    <input type="text" id="customFixtureType${fixtureCount}" name="customFixtureType${fixtureCount}" placeholder="Enter custom fixture type" style="display: none; margin-top: 5px;" onchange="updateCustomFixtureType(${fixtureCount})" onkeyup="updateCustomFixtureType(${fixtureCount})">
                 </div>
                 
                 <div class="form-group item-quantity">
@@ -206,15 +251,23 @@ function saveFormData() {
         // Save fixture data
         for (let i = 1; i <= fixtureCount; i++) {
             const fixtureType = document.getElementById(`fixtureType${i}`);
+            const customFixtureType = document.getElementById(`customFixtureType${i}`);
             const fixtureQuantity = document.getElementById(`fixtureQuantity${i}`);
             const fixtureRate = document.getElementById(`fixtureRate${i}`);
             
             if (fixtureType && fixtureQuantity && fixtureRate) {
-                formData.fixtures.push({
+                const fixtureData = {
                     type: fixtureType.value,
                     quantity: fixtureQuantity.value,
                     rate: fixtureRate.value
-                });
+                };
+                
+                // Add custom fixture type if applicable
+                if (fixtureType.value === 'custom' && customFixtureType) {
+                    fixtureData.customType = customFixtureType.value;
+                }
+                
+                formData.fixtures.push(fixtureData);
             }
         }
         
@@ -254,6 +307,16 @@ function loadFormData() {
             // Set first fixture
             if (formData.fixtures[0]) {
                 document.getElementById('fixtureType1').value = formData.fixtures[0].type || '';
+                
+                // Handle custom fixture type
+                if (formData.fixtures[0].type === 'custom') {
+                    const customTypeElement = document.getElementById('customFixtureType1');
+                    if (customTypeElement) {
+                        customTypeElement.style.display = 'block';
+                        customTypeElement.value = formData.fixtures[0].customType || '';
+                    }
+                }
+                
                 document.getElementById('fixtureQuantity1').value = formData.fixtures[0].quantity || '1';
                 document.getElementById('fixtureRate1').value = formData.fixtures[0].rate || '0';
                 calculateFixtureAmount(1);
@@ -263,6 +326,16 @@ function loadFormData() {
             for (let i = 1; i < formData.fixtures.length; i++) {
                 addNewFixtureItem();
                 document.getElementById(`fixtureType${i+1}`).value = formData.fixtures[i].type || '';
+                
+                // Handle custom fixture type
+                if (formData.fixtures[i].type === 'custom') {
+                    const customTypeElement = document.getElementById(`customFixtureType${i+1}`);
+                    if (customTypeElement) {
+                        customTypeElement.style.display = 'block';
+                        customTypeElement.value = formData.fixtures[i].customType || '';
+                    }
+                }
+                
                 document.getElementById(`fixtureQuantity${i+1}`).value = formData.fixtures[i].quantity || '1';
                 document.getElementById(`fixtureRate${i+1}`).value = formData.fixtures[i].rate || '0';
                 calculateFixtureAmount(i+1);
@@ -405,29 +478,87 @@ document.addEventListener('DOMContentLoaded', function() {
                     return;
                 }
             }
-            document.getElementById('homeName').value = 'Smith Residence';
+            document.getElementById('homeName').value = 'Johnson New Build';
             document.getElementById('jobDate').valueAsDate = today;
             
-            // Set first fixture
-            document.getElementById('fixtureType1').value = 'Light Fixture';
-            document.getElementById('fixtureQuantity1').value = '8';
-            updateFixtureRate(1);
+            // Set first fixture - Kitchen
+            document.getElementById('fixtureType1').value = 'Faucets';
+            document.getElementById('fixtureQuantity1').value = '2';
+            document.getElementById('fixtureRate1').value = '65.00';
+            calculateFixtureAmount(1);
             
-            // Add second fixture
+            // Add second fixture - Kitchen
             addNewFixtureItem();
-            document.getElementById('fixtureType2').value = 'Outlet';
-            document.getElementById('fixtureQuantity2').value = '12';
-            updateFixtureRate(2);
+            document.getElementById('fixtureType2').value = 'Sinks';
+            document.getElementById('fixtureQuantity2').value = '2';
+            document.getElementById('fixtureRate2').value = '85.00';
+            calculateFixtureAmount(2);
             
-            // Add third fixture
+            // Add third fixture - Kitchen
             addNewFixtureItem();
-            document.getElementById('fixtureType3').value = 'Ceiling Fan';
-            document.getElementById('fixtureQuantity3').value = '3';
-            updateFixtureRate(3);
+            document.getElementById('fixtureType3').value = 'Dishwasher and Ice Maker Connections';
+            document.getElementById('fixtureQuantity3').value = '1';
+            document.getElementById('fixtureRate3').value = '85.00';
+            calculateFixtureAmount(3);
             
-            document.getElementById('notes').value = 'New construction, all fixtures installed and tested.';
+            // Add fourth fixture - Bathrooms
+            addNewFixtureItem();
+            document.getElementById('fixtureType4').value = 'Toilets';
+            document.getElementById('fixtureQuantity4').value = '3';
+            document.getElementById('fixtureRate4').value = '120.00';
+            calculateFixtureAmount(4);
             
+            // Add fifth fixture - Bathrooms
+            addNewFixtureItem();
+            document.getElementById('fixtureType5').value = 'Bathtubs';
+            document.getElementById('fixtureQuantity5').value = '2';
+            document.getElementById('fixtureRate5').value = '250.00';
+            calculateFixtureAmount(5);
+            
+            // Add sixth fixture - Bathrooms
+            addNewFixtureItem();
+            document.getElementById('fixtureType6').value = 'Showers';
+            document.getElementById('fixtureQuantity6').value = '1';
+            document.getElementById('fixtureRate6').value = '180.00';
+            calculateFixtureAmount(6);
+            
+            // Add seventh fixture - Utility
+            addNewFixtureItem();
+            document.getElementById('fixtureType7').value = 'Water Heaters';
+            document.getElementById('fixtureQuantity7').value = '1';
+            document.getElementById('fixtureRate7').value = '350.00';
+            calculateFixtureAmount(7);
+            
+            // Add eighth fixture - Utility
+            addNewFixtureItem();
+            document.getElementById('fixtureType8').value = 'Washing Machine Hookups';
+            document.getElementById('fixtureQuantity8').value = '1';
+            document.getElementById('fixtureRate8').value = '95.00';
+            calculateFixtureAmount(8);
+            
+            // Add ninth fixture - Exterior
+            addNewFixtureItem();
+            document.getElementById('fixtureType9').value = 'Hose Bibs';
+            document.getElementById('fixtureQuantity9').value = '2';
+            document.getElementById('fixtureRate9').value = '45.00';
+            calculateFixtureAmount(9);
+            
+            // Add tenth fixture - Custom
+            addNewFixtureItem();
+            document.getElementById('fixtureType10').value = 'custom';
+            document.getElementById('customFixtureType10').style.display = 'block';
+            document.getElementById('customFixtureType10').value = 'Water Softener System';
+            document.getElementById('fixtureQuantity10').value = '1';
+            document.getElementById('fixtureRate10').value = '275.00';
+            calculateFixtureAmount(10);
+            
+            document.getElementById('notes').value = 'New construction, 3 bedroom, 2.5 bath home. All fixtures installed and tested. Water softener system installed in utility room. Customer requested premium fixtures in master bath.';
+            
+            // Calculate job total
             calculateTotals();
+            
+            // Ensure job total is visible
+            document.getElementById('jobTotal').value = '1955.00';
             
             // Save sample data to local storage
             saveFormData();

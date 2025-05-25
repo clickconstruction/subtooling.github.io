@@ -66,13 +66,18 @@
                                 <label for="fixtureType1">Fixture Type:</label>
                                 <select id="fixtureType1" name="fixtureType1" required onchange="updateFixtureRate(1)">
                                     <option value="">Select Type</option>
-                                    <option value="Light Fixture">Light Fixture</option>
-                                    <option value="Outlet">Outlet</option>
-                                    <option value="Switch">Switch</option>
-                                    <option value="Ceiling Fan">Ceiling Fan</option>
-                                    <option value="Smoke Detector">Smoke Detector</option>
-                                    <option value="Other">Other</option>
+                                    <option value="Faucets">Faucets</option>
+                                    <option value="Sinks">Sinks</option>
+                                    <option value="Toilets">Toilets</option>
+                                    <option value="Bathtubs">Bathtubs</option>
+                                    <option value="Showers">Showers</option>
+                                    <option value="Water Heaters">Water Heaters</option>
+                                    <option value="Hose Bibs">Hose Bibs</option>
+                                    <option value="Washing Machine Hookups">Washing Machine Hookups</option>
+                                    <option value="Dishwasher and Ice Maker Connections">Dishwasher and Ice Maker Connections</option>
+                                    <option value="custom">Custom...</option>
                                 </select>
+                                <input type="text" id="customFixtureType1" name="customFixtureType1" placeholder="Enter custom fixture type" style="display: none; margin-top: 5px;" onchange="updateCustomFixtureType(1)" onkeyup="updateCustomFixtureType(1)">
                             </div>
                             
                             <div class="form-group item-quantity">

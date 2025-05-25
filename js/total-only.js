@@ -1,6 +1,52 @@
 // Make fixtureCount globally accessible
 let fixtureCount = 1;
 
+// Toggle custom fixture type input
+window.toggleCustomFixtureType = function(index) {
+    try {
+        console.log('Toggling custom fixture type for fixture ' + index);
+        const typeElement = document.getElementById('fixtureType' + index);
+        const customTypeElement = document.getElementById('customFixtureType' + index);
+        
+        if (!typeElement || !customTypeElement) {
+            console.error('Missing elements for fixture ' + index);
+            return;
+        }
+        
+        const fixtureType = typeElement.value;
+        
+        // Toggle custom fixture type input
+        if (fixtureType === 'custom') {
+            customTypeElement.style.display = 'block';
+        } else {
+            customTypeElement.style.display = 'none';
+        }
+        
+        // Save form data after toggling
+        saveFormData();
+    } catch (error) {
+        console.error('Error toggling custom fixture type for fixture ' + index + ':', error);
+    }
+};
+
+// Update custom fixture type
+window.updateCustomFixtureType = function(index) {
+    try {
+        console.log('Updating custom fixture type for fixture ' + index);
+        const customTypeElement = document.getElementById('customFixtureType' + index);
+        
+        if (!customTypeElement) {
+            console.error('Missing custom type element for fixture ' + index);
+            return;
+        }
+        
+        // Save form data after updating custom type
+        saveFormData();
+    } catch (error) {
+        console.error('Error updating custom fixture type for fixture ' + index + ':', error);
+    }
+};
+
 // Save form data to local storage
 function saveFormData() {
     try {
@@ -15,13 +61,21 @@ function saveFormData() {
         // Save fixture data
         for (let i = 1; i <= fixtureCount; i++) {
             const fixtureType = document.getElementById(`fixtureType${i}`);
+            const customFixtureType = document.getElementById(`customFixtureType${i}`);
             const fixtureQuantity = document.getElementById(`fixtureQuantity${i}`);
             
             if (fixtureType && fixtureQuantity) {
-                formData.fixtures.push({
+                const fixtureData = {
                     type: fixtureType.value,
                     quantity: fixtureQuantity.value
-                });
+                };
+                
+                // Add custom fixture type if applicable
+                if (fixtureType.value === 'custom' && customFixtureType) {
+                    fixtureData.customType = customFixtureType.value;
+                }
+                
+                formData.fixtures.push(fixtureData);
             }
         }
         
@@ -62,6 +116,16 @@ function loadFormData() {
             // Set first fixture
             if (formData.fixtures[0]) {
                 document.getElementById('fixtureType1').value = formData.fixtures[0].type || '';
+                
+                // Handle custom fixture type
+                if (formData.fixtures[0].type === 'custom') {
+                    const customTypeElement = document.getElementById('customFixtureType1');
+                    if (customTypeElement) {
+                        customTypeElement.style.display = 'block';
+                        customTypeElement.value = formData.fixtures[0].customType || '';
+                    }
+                }
+                
                 document.getElementById('fixtureQuantity1').value = formData.fixtures[0].quantity || '1';
             }
             
@@ -69,6 +133,16 @@ function loadFormData() {
             for (let i = 1; i < formData.fixtures.length; i++) {
                 addNewFixtureItem();
                 document.getElementById(`fixtureType${i+1}`).value = formData.fixtures[i].type || '';
+                
+                // Handle custom fixture type
+                if (formData.fixtures[i].type === 'custom') {
+                    const customTypeElement = document.getElementById(`customFixtureType${i+1}`);
+                    if (customTypeElement) {
+                        customTypeElement.style.display = 'block';
+                        customTypeElement.value = formData.fixtures[i].customType || '';
+                    }
+                }
+                
                 document.getElementById(`fixtureQuantity${i+1}`).value = formData.fixtures[i].quantity || '1';
             }
         }
@@ -148,15 +222,20 @@ function addNewFixtureItem(e) {
             <div class="form-row">
                 <div class="form-group item-type">
                     <label for="fixtureType${fixtureCount}">Fixture Type:</label>
-                    <select id="fixtureType${fixtureCount}" name="fixtureType${fixtureCount}" required>
+                    <select id="fixtureType${fixtureCount}" name="fixtureType${fixtureCount}" required onchange="toggleCustomFixtureType(${fixtureCount})">
                         <option value="">Select Type</option>
-                        <option value="Light Fixture">Light Fixture</option>
-                        <option value="Outlet">Outlet</option>
-                        <option value="Switch">Switch</option>
-                        <option value="Ceiling Fan">Ceiling Fan</option>
-                        <option value="Smoke Detector">Smoke Detector</option>
-                        <option value="Other">Other</option>
+                        <option value="Faucets">Faucets</option>
+                        <option value="Sinks">Sinks</option>
+                        <option value="Toilets">Toilets</option>
+                        <option value="Bathtubs">Bathtubs</option>
+                        <option value="Showers">Showers</option>
+                        <option value="Water Heaters">Water Heaters</option>
+                        <option value="Hose Bibs">Hose Bibs</option>
+                        <option value="Washing Machine Hookups">Washing Machine Hookups</option>
+                        <option value="Dishwasher and Ice Maker Connections">Dishwasher and Ice Maker Connections</option>
+                        <option value="custom">Custom...</option>
                     </select>
+                    <input type="text" id="customFixtureType${fixtureCount}" name="customFixtureType${fixtureCount}" placeholder="Enter custom fixture type" style="display: none; margin-top: 5px;" onchange="updateCustomFixtureType(${fixtureCount})" onkeyup="updateCustomFixtureType(${fixtureCount})">
                 </div>
                 
                 <div class="form-group item-quantity">
@@ -285,25 +364,81 @@ document.addEventListener('DOMContentLoaded', function() {
                     return;
                 }
             }
-            document.getElementById('homeName').value = 'Smith Residence';
+            
+            // Create a new date object for today
+            const today = new Date();
+            
+            document.getElementById('homeName').value = 'Johnson New Build';
             document.getElementById('jobDate').valueAsDate = today;
             
-            // Set first fixture
-            document.getElementById('fixtureType1').value = 'Light Fixture';
-            document.getElementById('fixtureQuantity1').value = '8';
+            // Set first fixture - Kitchen
+            document.getElementById('fixtureType1').value = 'Faucets';
+            document.getElementById('fixtureQuantity1').value = '2';
             
-            // Add second fixture
+            // Add second fixture - Kitchen
             addNewFixtureItem();
-            document.getElementById('fixtureType2').value = 'Outlet';
-            document.getElementById('fixtureQuantity2').value = '12';
+            document.getElementById('fixtureType2').value = 'Sinks';
+            document.getElementById('fixtureQuantity2').value = '2';
             
-            // Add third fixture
+            // Add third fixture - Kitchen
             addNewFixtureItem();
-            document.getElementById('fixtureType3').value = 'Ceiling Fan';
-            document.getElementById('fixtureQuantity3').value = '3';
+            document.getElementById('fixtureType3').value = 'Dishwasher and Ice Maker Connections';
+            document.getElementById('fixtureQuantity3').value = '1';
             
-            document.getElementById('notes').value = 'New construction, all fixtures installed and tested.';
-            document.getElementById('jobTotal').value = '675.00';
+            // Add fourth fixture - Bathrooms
+            addNewFixtureItem();
+            document.getElementById('fixtureType4').value = 'Toilets';
+            document.getElementById('fixtureQuantity4').value = '3';
+            
+            // Add fifth fixture - Bathrooms
+            addNewFixtureItem();
+            document.getElementById('fixtureType5').value = 'Bathtubs';
+            document.getElementById('fixtureQuantity5').value = '2';
+            
+            // Add sixth fixture - Bathrooms
+            addNewFixtureItem();
+            document.getElementById('fixtureType6').value = 'Showers';
+            document.getElementById('fixtureQuantity6').value = '1';
+            
+            // Add seventh fixture - Utility
+            addNewFixtureItem();
+            document.getElementById('fixtureType7').value = 'Water Heaters';
+            document.getElementById('fixtureQuantity7').value = '1';
+            
+            // Add eighth fixture - Utility
+            addNewFixtureItem();
+            document.getElementById('fixtureType8').value = 'Washing Machine Hookups';
+            document.getElementById('fixtureQuantity8').value = '1';
+            
+            // Add ninth fixture - Exterior
+            addNewFixtureItem();
+            document.getElementById('fixtureType9').value = 'Hose Bibs';
+            document.getElementById('fixtureQuantity9').value = '2';
+            
+            // Add tenth fixture - Custom
+            addNewFixtureItem();
+            document.getElementById('fixtureType10').value = 'custom';
+            document.getElementById('customFixtureType10').style.display = 'block';
+            document.getElementById('customFixtureType10').value = 'Water Softener System';
+            document.getElementById('fixtureQuantity10').value = '1';
+            
+            document.getElementById('notes').value = 'New construction, 3 bedroom, 2.5 bath home. All fixtures installed and tested. Water softener system installed in utility room. Customer requested premium fixtures in master bath.';
+            
+            // Ensure job total is set correctly and visible
+            const jobTotalField = document.getElementById('jobTotal');
+            if (jobTotalField) {
+                // Force a reset first
+                jobTotalField.value = '';
+                // Then set the value with a slight delay to ensure it takes effect
+                setTimeout(() => {
+                    jobTotalField.value = '1955.00';
+                    // Force a change event to ensure any listeners are triggered
+                    const event = new Event('change');
+                    jobTotalField.dispatchEvent(event);
+                }, 100);
+            } else {
+                console.error('Job total field not found');
+            }
             
             // Save sample data to local storage
             saveFormData();
