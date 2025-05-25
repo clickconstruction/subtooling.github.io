@@ -478,6 +478,10 @@ document.addEventListener('DOMContentLoaded', function() {
                     return;
                 }
             }
+            
+            // Create a new date object for today
+            const today = new Date();
+            
             document.getElementById('homeName').value = 'Johnson New Build';
             document.getElementById('jobDate').valueAsDate = today;
             
