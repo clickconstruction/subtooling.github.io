@@ -1,3 +1,10 @@
+// A date input's value is a calendar day. `valueAsDate = new Date()` writes the UTC day, which
+// is already tomorrow every evening in the US — so the job date is built from the local date.
+function localTodayYmd() {
+    const d = new Date();
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+}
+
 // Define calculateFixtureAmount as a global function so it can be called from HTML
 window.calculateFixtureAmount = function(index) {
     try {
@@ -297,7 +304,7 @@ function loadFormData() {
             document.getElementById('jobDate').value = formData.jobDate;
         } else {
             // Set current date if no saved date
-            document.getElementById('jobDate').valueAsDate = new Date();
+            document.getElementById('jobDate').value = localTodayYmd();
         }
         
         document.getElementById('notes').value = formData.notes || '';
@@ -362,7 +369,7 @@ function clearAllData() {
         document.getElementById('fixtureForm').reset();
         
         // Set current date
-        document.getElementById('jobDate').valueAsDate = new Date();
+        document.getElementById('jobDate').value = localTodayYmd();
         
         // Remove additional fixtures
         const fixtureItems = document.getElementById('fixtureItems');
@@ -433,7 +440,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (!loadFormData()) {
         // Set current date for job date if no saved data
         const today = new Date();
-        document.getElementById('jobDate').valueAsDate = today;
+        document.getElementById('jobDate').value = localTodayYmd();
     }
     
     // Add save data listeners to form inputs
@@ -483,7 +490,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const today = new Date();
             
             document.getElementById('homeName').value = 'Johnson New Build';
-            document.getElementById('jobDate').valueAsDate = today;
+            document.getElementById('jobDate').value = localTodayYmd();
             
             // Set first fixture - Kitchen
             document.getElementById('fixtureType1').value = 'Faucets';
