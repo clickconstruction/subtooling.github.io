@@ -597,6 +597,19 @@ function generatePrefillLink() {
     document.getElementById('prefillLink').value = fullUrl;
 }
 
+// The name a line prints under: a custom line prints the name typed for it, not the word "custom".
+function fixtureLabel(i) {
+    const type = document.getElementById(`fixtureType${i}`);
+    const custom = document.getElementById(`customFixtureType${i}`);
+    if (type && type.value === 'custom' && custom && custom.value.trim()) return custom.value.trim();
+    return type ? type.value : '';
+}
+
+// Typed text goes into the preview as text, never as markup (a pre-fill link can carry anything).
+function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+
 // Generate PDF job value
 function generateJobValuePDF() {
     const { jsPDF } = window.jspdf;
@@ -629,7 +642,7 @@ function generateJobValuePDF() {
     
     // Add fixture items
     for (let i = 1; i <= fixtureCount; i++) {
-        const fixtureType = document.getElementById(`fixtureType${i}`).value;
+        const fixtureType = fixtureLabel(i);
         const fixtureQuantity = document.getElementById(`fixtureQuantity${i}`).value;
         
         doc.text(fixtureType, 20, yPos);
@@ -675,7 +688,7 @@ function generateJobValuePreview() {
     let previewHTML = `
         <div class="job-value-preview">
             <div class="preview-header">
-                <h1>Job Value: ${homeName}</h1>
+                <h1>Job Value: ${escapeHtml(homeName)}</h1>
                 <p class="date">Date: ${formattedDate}</p>
             </div>
             
@@ -693,12 +706,12 @@ function generateJobValuePreview() {
     
     // Add fixture items
     for (let i = 1; i <= fixtureCount; i++) {
-        const fixtureType = document.getElementById(`fixtureType${i}`).value;
+        const fixtureType = fixtureLabel(i);
         const fixtureQuantity = document.getElementById(`fixtureQuantity${i}`).value;
         
         previewHTML += `
             <tr>
-                <td>${fixtureType}</td>
+                <td>${escapeHtml(fixtureType)}</td>
                 <td>${fixtureQuantity}</td>
             </tr>
         `;
@@ -722,7 +735,7 @@ function generateJobValuePreview() {
         previewHTML += `
             <div class="notes-section">
                 <h2>Notes</h2>
-                <p>${notes.replace(/\n/g, '<br>')}</p>
+                <p>${escapeHtml(notes).replace(/\n/g, '<br>')}</p>
             </div>
         `;
     }
